@@ -45,19 +45,10 @@ app.get("/token", async (req, res) => {
   });
 
   const items = await axiosAuth.get(
-    "https://api.podio.com/item/app/24984980?limit=350"
+    "https://api.podio.com/item/app/25014884?limit=500"
   );
   const headers = [
-    "Creado el",
-    "Creado por",
-    "Cliente",
-    "Fecha de Finalización Estimada - P1",
-    "Fecha de Finalización Efectiva - P1",
-    "Consultor responsable",
-    "Fecha de finalización estimada - P2",
-    "Fecha Finalización P2",
-    "Fecha de finalización estimada P3",
-    "Fecha finalización P3",
+    212949937, 212950372, 220878171, 220878172, 220878173, 220878174,
   ];
 
   const fichacliente = [];
@@ -65,21 +56,16 @@ app.get("/token", async (req, res) => {
   items.data.items.forEach((item, index) => {
     const { fields } = item;
     let currentItem = [];
-    currentItem.push({ title: "Creado el", value: item.created_on });
-    currentItem.push({ title: "Creado por", value: item.created_by.name });
     Object.values(fields).forEach((field) => {
-      if (headers[2] === field.label) {
-        currentItem.push({ title: field.label, value: field.values[0].value });
-      } else if (headers[5] === field.label) {
+      if (headers[0] === field.field_id) {
         currentItem.push({
-          title: field.label,
-          value: field.values[0].value.text,
-        });
-      } else if (headers.includes(field.label)) {
-        console.log(`${field.label}` + field.values[0].start_date_utc);
-        currentItem.push({
-          title: field.label,
+          title: field.field_id,
           value: field.values[0].start_date_utc,
+        });
+      } else if (headers.includes(field.field_id)) {
+        currentItem.push({
+          title: field.field_id,
+          value: field.values[0].value.text,
         });
       }
       // console.log(`label : ${field.label} value: ${field.values["0"].value}`);
@@ -97,6 +83,7 @@ app.get("/token", async (req, res) => {
         newItem.push(currentItem[index]);
       }
     });
+    console.table(newItem);
     fichacliente.push([...newItem]);
   });
 

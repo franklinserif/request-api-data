@@ -45,24 +45,17 @@ app.get("/token", async (req, res) => {
   });
 
   const items = await axiosAuth.get(
-    "https://api.podio.com/item/app/24984980?limit=350"
+    "https://api.podio.com/item/app/25014884?limit=500"
   );
   const headers = [
     "Creado el",
-    "Creado por",
-    "Cliente",
-    "Fecha de Finalización Estimada - P1",
-    "Fecha de Finalización Efectiva - P1",
-    "Consultor responsable",
-    "Fecha de finalización estimada - P2",
-    "Fecha Finalización P2",
-    "Fecha de finalización estimada P3",
-    "Fecha finalización P3",
-    "Número de Proyecto en el que se encuentra la cuenta",
-    "Estado",
-    "Tipo de empresa",
-    "País",
-    "Expectativas y objetivo del proyecto",
+    "Empresa",
+    "Fecha de encuesta",
+    "¿Cuál es la probabilidad de que recomiendes nuestro servicio a otra empresa?",
+    "¿Qué tan satisfecho/a estas con el avance del proyecto en función de los objetivos planteados y los desafíos de tu empresa?",
+    "¿Qué tan satisfecho/a estas con el direccionamiento del proyecto por parte del consultor/a?",
+    "¿Qué tan satisfecho/a estás con el plan de trabajo de  este mes?",
+    "¿Cómo evalúas la implementación por parte de tu empresa de las estrategias sugeridas por ArchGroup este mes?",
   ];
 
   const fichacliente = [];
@@ -71,39 +64,30 @@ app.get("/token", async (req, res) => {
     const { fields } = item;
     let currentItem = [];
     currentItem.push({ title: "Creado el", value: item.created_on });
-    currentItem.push({ title: "Creado por", value: item.created_by.name });
+
     Object.values(fields).forEach((field) => {
-      if (headers[2] === field.label || headers[14] === field.label) {
-        currentItem.push({ title: field.label, value: field.values[0].value });
-      } else if (
-        field.label === headers[5] ||
-        field.label === headers[10] ||
-        field.label === headers[11] ||
-        field.label === headers[12] ||
-        field.label === headers[13]
-      ) {
-        //console.log(field.text);
-        currentItem.push({
-          title: field.label,
-          value: field.values[0].value.text,
-        });
-      } else if (
-        field.label === headers[3] ||
-        field.label === headers[4] ||
-        field.label === headers[6] ||
-        field.label === headers[7] ||
-        field.label === headers[8] ||
-        field.label === headers[9]
-      ) {
-        currentItem.push({
-          title: field.label,
-          value: field.values[0].start_date_utc,
-        });
+      if (headers.includes(field.label)) {
+        if (field.values[0].value?.text) {
+          currentItem.push({
+            title: field.label,
+            value: field.values[0].value.text,
+          });
+        } else if (field.values[0].value?.start_date_utc) {
+          currentItem.push({
+            title: field.label,
+            value: field.values[0].value.start_date_utc,
+          });
+        } else if (field.values[0].value) {
+          currentItem.push({
+            title: field.label,
+            value: field.values[0].value,
+          });
+        }
       }
     });
 
     let newItem = [];
-    //console.table(currentItem);
+
     headers.forEach((header, index) => {
       let currentField = null;
       Object.values(currentItem).forEach((item) => {

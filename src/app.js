@@ -58,6 +58,11 @@ app.get("/token", async (req, res) => {
     "Fecha Finalización P2",
     "Fecha de finalización estimada P3",
     "Fecha finalización P3",
+    "Número de Proyecto en el que se encuentra la cuenta",
+    "Estado",
+    "Tipo de empresa",
+    "País",
+    "Expectativas y objetivo del proyecto",
   ];
 
   const fichacliente = [];
@@ -68,26 +73,52 @@ app.get("/token", async (req, res) => {
     currentItem.push({ title: "Creado el", value: item.created_on });
     currentItem.push({ title: "Creado por", value: item.created_by.name });
     Object.values(fields).forEach((field) => {
-      if (headers[2] === field.label) {
+      if (headers[2] === field.label || headers[14] === field.label) {
         currentItem.push({ title: field.label, value: field.values[0].value });
-      } else if (headers[5] === field.label) {
+      } else if (
+        field.label === headers[5] ||
+        field.label === headers[10] ||
+        field.label === headers[11] ||
+        field.label === headers[12] ||
+        field.label === headers[13]
+      ) {
+        //console.log(field.text);
         currentItem.push({
           title: field.label,
           value: field.values[0].value.text,
         });
-      } else if (headers.includes(field.label)) {
-        console.log(`${field.label}` + field.values[0].start_date_utc);
+      } else if (
+        field.label === headers[3] ||
+        field.label === headers[4] ||
+        field.label === headers[6] ||
+        field.label === headers[7] ||
+        field.label === headers[8] ||
+        field.label === headers[9]
+      ) {
         currentItem.push({
           title: field.label,
           value: field.values[0].start_date_utc,
         });
       }
-      // console.log(`label : ${field.label} value: ${field.values["0"].value}`);
     });
 
     let newItem = [];
-
+    //console.table(currentItem);
     headers.forEach((header, index) => {
+      let currentField = null;
+      Object.values(currentItem).forEach((item) => {
+        if (item.title === header) {
+          currentField = item.value;
+        }
+      });
+
+      if (!currentField) {
+        newItem.push({ title: header, value: null });
+      } else {
+        newItem.push({ title: header, value: currentField });
+      }
+
+      /* 
       if (
         currentItem[index] === undefined ||
         currentItem[index].title !== header
@@ -95,12 +126,14 @@ app.get("/token", async (req, res) => {
         newItem.push({ title: header, value: null });
       } else {
         newItem.push(currentItem[index]);
-      }
+      } */
     });
+
+    console.table(newItem);
     fichacliente.push([...newItem]);
   });
 
-  res.send("cool");
+  res.send("completed");
 });
 
 app.get("/", (req, res) => {

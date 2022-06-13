@@ -67,17 +67,17 @@ app.get("/token", async (req, res) => {
             title: field.label,
             value: field.values[0].value.start_date_utc,
           });
+        } else if (field.values[0].start_date_utc) {
+          currentItem.push({
+            title: field.label,
+            value: field.values[0].start_date_utc,
+          });
+        } else if (field.values[0].value) {
+          currentItem.push({
+            title: field.label,
+            value: field.values[0].value,
+          });
         }
-      } else if (field.values[0].start_date_utc) {
-        currentItem.push({
-          title: field.label,
-          value: field.values[0].start_date_utc,
-        });
-      } else if (field.values[0].value) {
-        currentItem.push({
-          title: field.label,
-          value: field.values[0].value,
-        });
       }
     });
 

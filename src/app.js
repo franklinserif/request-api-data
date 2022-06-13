@@ -59,6 +59,7 @@ app.get("/token", async (req, res) => {
         } else if (field.values[0].start_date_utc) {
           currentItem.push({
             title: field.label.trim(),
+
             value: field.values[0].start_date_utc,
           });
         } else if (field.values[0].value) {

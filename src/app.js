@@ -117,6 +117,27 @@ app.get("/token", async (req, res) => {
     fichacliente.push([...newItem]);
   });
 
+  fichacliente.forEach((item) => {
+    const row = {};
+    item.forEach((field, index) => {
+      row[tableNames[index]] = field.value;
+    });
+    try {
+      pool.query(
+        "INSERT INTO oportunidades_upselling SET ?",
+        row,
+        (error, results, fields) => {
+          if (error) throw error;
+        }
+      );
+    } catch (error) {
+      console.log(error);
+    }
+  });
+
+  res.send("completed");
+});
+
   res.send("completed");
 });
 

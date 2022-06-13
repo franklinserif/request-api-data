@@ -36,7 +36,7 @@ app.get("/token", async (req, res) => {
   const items = await axiosAuth.get(
     "https://api.podio.com/item/app/25858633?limit=500"
   );
-  const headers = ["Fecha de contacto"];
+  const headers = ["Creado el", "Fecha de contacto"];
 
   const fichacliente = [];
 

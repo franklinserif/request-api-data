@@ -15,7 +15,7 @@ async function auth(url) {
 
 app.get("/auth", async (req, res) => {
   const response = await auth(authUrl);
-  try {
+  /* try {
     pool.query(
       "SELECT * FROM ficha_de_cliente",
       function (error, results, fields) {
@@ -25,7 +25,7 @@ app.get("/auth", async (req, res) => {
     );
   } catch (error) {
     console.log(`mysql error: ${error}`);
-  }
+  } */
 
   res.redirect(response.request.res.responseUrl);
 });
@@ -45,25 +45,15 @@ app.get("/token", async (req, res) => {
   });
 
   const items = await axiosAuth.get(
-    "https://api.podio.com/item/app/25014884?limit=500"
+    "https://api.podio.com/item/app/25736871?limit=500"
   );
-  const headers = [
-    "Creado el",
-    "Empresa",
-    "Fecha de encuesta",
-    "¿Cuál es la probabilidad de que recomiendes nuestro servicio a otra empresa?",
-    "¿Qué tan satisfecho/a estas con el avance del proyecto en función de los objetivos planteados y los desafíos de tu empresa?",
-    "¿Qué tan satisfecho/a estas con el direccionamiento del proyecto por parte del consultor/a?",
-    "¿Qué tan satisfecho/a estás con el plan de trabajo de  este mes?",
-    "¿Cómo evalúas la implementación por parte de tu empresa de las estrategias sugeridas por ArchGroup este mes?",
-  ];
+  const headers = ["Fecha de cierre de la propuesta", "Cerró"];
 
   const fichacliente = [];
 
   items.data.items.forEach((item, index) => {
     const { fields } = item;
     let currentItem = [];
-    currentItem.push({ title: "Creado el", value: item.created_on });
 
     Object.values(fields).forEach((field) => {
       if (headers.includes(field.label)) {
@@ -77,12 +67,17 @@ app.get("/token", async (req, res) => {
             title: field.label,
             value: field.values[0].value.start_date_utc,
           });
-        } else if (field.values[0].value) {
-          currentItem.push({
-            title: field.label,
-            value: field.values[0].value,
-          });
         }
+      } else if (field.values[0].start_date_utc) {
+        currentItem.push({
+          title: field.label,
+          value: field.values[0].start_date_utc,
+        });
+      } else if (field.values[0].value) {
+        currentItem.push({
+          title: field.label,
+          value: field.values[0].value,
+        });
       }
     });
 

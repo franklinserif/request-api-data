@@ -34,19 +34,26 @@ app.get("/token", async (req, res) => {
   });
 
   const items = await axiosAuth.get(
-    "https://api.podio.com/item/app/25858633?limit=500"
+    "https://api.podio.com/item/app/24989667?limit=500"
   );
-  const headers = ["Creado el", "Fecha de contacto"];
+  const headers = [
+    "Fecha de reunión",
+    "Empresa",
+    "Consultor",
+    "Nº de reunión",
+    "Estado",
+    "Qué se hizo",
+  ];
 
   const fichacliente = [];
 
   items.data.items.forEach((item, index) => {
     const { fields } = item;
     let currentItem = [];
-    currentItem.push({
+    /*  currentItem.push({
       title: "Creado el",
       value: item.created_on,
-    });
+    }); */
     Object.values(fields).forEach((field) => {
       if (headers.includes(field.label.trim())) {
         if (field.values[0].value?.text) {

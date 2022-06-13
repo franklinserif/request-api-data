@@ -36,6 +36,8 @@ app.get("/token", async (req, res) => {
   const items = await axiosAuth.get(
     "https://api.podio.com/item/app/25858633?limit=500"
   );
+
+  const tableNames = [`creado_el`, `fecha_de_contacto`];
   const headers = ["Creado el", "Fecha de contacto"];
 
   const fichacliente = [];
@@ -91,8 +93,26 @@ app.get("/token", async (req, res) => {
       }
     });
 
-    console.table(newItem);
+    //console.table(newItem);
     fichacliente.push([...newItem]);
+  });
+
+  fichacliente.forEach((item) => {
+    const row = {};
+    item.forEach((field, index) => {
+      row[tableNames[index]] = field.value;
+    });
+    try {
+      pool.query(
+        "INSERT INTO referidos_de_cuentas SET ?",
+        row,
+        (error, results, fields) => {
+          if (error) throw error;
+        }
+      );
+    } catch (error) {
+      console.log(error);
+    }
   });
 
   res.send("completed");

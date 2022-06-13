@@ -36,6 +36,8 @@ app.get("/token", async (req, res) => {
   const items = await axiosAuth.get(
     "https://api.podio.com/item/app/25736765?limit=500"
   );
+
+  const tableNames = [`fecha_r1`, `se tuvo_la_ r1`, `categoria`];
   const headers = ["Fecha R1", "Se tuvo la  R1 ?", "Categoria"];
 
   const fichacliente = [];
@@ -89,6 +91,20 @@ app.get("/token", async (req, res) => {
 
     console.table(newItem);
     fichacliente.push([...newItem]);
+  });
+
+  fichacliente.forEach((item) => {
+    const row = {};
+    item.forEach((field, index) => {
+      row[tableNames[index]] = field.value;
+    });
+    try {
+      pool.query("INSERT INTO r1 SET ?", row, (error, results, fields) => {
+        if (error) throw error;
+      });
+    } catch (error) {
+      console.log(error);
+    }
   });
 
   res.send("completed");

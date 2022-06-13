@@ -15,17 +15,6 @@ async function auth(url) {
 
 app.get("/auth", async (req, res) => {
   const response = await auth(authUrl);
-  try {
-    pool.query(
-      "SELECT * FROM ficha_de_cliente",
-      function (error, results, fields) {
-        if (error) throw error;
-        //console.log("sql query result: ", results[0]);
-      }
-    );
-  } catch (error) {
-    console.log(`mysql error: ${error}`);
-  }
 
   res.redirect(response.request.res.responseUrl);
 });
@@ -76,6 +65,11 @@ app.get("/token", async (req, res) => {
           currentItem.push({
             title: field.label,
             value: field.values[0].value.start_date_utc,
+          });
+        } else if (field.values[0].start_date_utc) {
+          currentItem.push({
+            title: field.label,
+            value: field.values[0].start_date_utc,
           });
         } else if (field.values[0].value) {
           currentItem.push({

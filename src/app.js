@@ -36,6 +36,27 @@ app.get("/token", async (req, res) => {
   const items = await axiosAuth.get(
     "https://api.podio.com/item/app/24984980?limit=350"
   );
+  {
+    ("");
+  }
+  const tableNames = [
+    "creado_el",
+    "creado_por",
+    "cliente",
+    "fecha_finalizacion_estimada_p1",
+    "fecha_finalizacion_efectiva_p1",
+    "consultor_responsable",
+    "fecha_finalizacion_estimada_p2",
+    "fecha_finalización_p2",
+    "fecha_finalizacion_estimada_p3",
+    "fecha_finalizacion_p3",
+    "numero_de_proyectos_en_el_que_se_encuentra",
+    "estado",
+    "tipo_de_empresa",
+    "pais",
+    "expectativas_y_objectivos_del_proyecto",
+  ];
+
   const headers = [
     "Creado el",
     "Creado por",
@@ -63,7 +84,10 @@ app.get("/token", async (req, res) => {
     currentItem.push({ title: "Creado por", value: item.created_by.name });
     Object.values(fields).forEach((field) => {
       if (headers[2] === field.label || headers[14] === field.label) {
-        currentItem.push({ title: field.label, value: field.values[0].value });
+        currentItem.push({
+          title: field.label,
+          value: field.values[0].value.replaceAll(/<[^>]*>?/gm, ""),
+        });
       } else if (
         field.label === headers[5] ||
         field.label === headers[10] ||
@@ -74,7 +98,7 @@ app.get("/token", async (req, res) => {
         //console.log(field.text);
         currentItem.push({
           title: field.label,
-          value: field.values[0].value.text,
+          value: field.values[0].value.text.replaceAll(/<[^>]*>?/gm, ""),
         });
       } else if (
         field.label === headers[3] ||
@@ -123,33 +147,20 @@ app.get("/token", async (req, res) => {
   });
 
   fichacliente.forEach((item) => {
+    const row = {};
+    item.forEach((field, index) => {
+      row[tableNames[index]] = field.value;
+    });
     try {
       pool.query(
-        `INSERT INTO podio.ficha_cliente(creado_el, creado_por, fecha_finalizacion_estimada_p1, fecha_finalizacion_efectiva_p1, consultor_responsable, fecha_finalizacion_estimada_p2, fecha_finalizacion_estimada_p3, fecha_finalizacion_p3, numero_de_proyectos_en_el_que_se_encuentra, estado, tipo_de_empresa, pais, expectativas_y_objectivos_del_proyecto) VALUES ?;`,
-        [
-          item[0].value == null ? "NULL" : item[0].value.replaceAll("-", " "),
-          item[1].value == null ? "NULL" : item[0].value,
-          item[2].value == null ? "NULL" : item[0].value,
-          item[3].value == null ? "NULL" : item[0].value.replaceAll("-", " "),
-          item[4].value == null ? "NULL" : item[0].value.replaceAll("-", " "),
-          item[5].value == null ? "NULL" : item[0].value,
-          item[6].value == null ? "NULL" : item[0].value.replaceAll("-", " "),
-          item[7].value == null ? "NULL" : item[0].value.replaceAll("-", " "),
-          item[8].value == null ? "NULL" : item[0].value.replaceAll("-", " "),
-          item[9].value == null ? "NULL" : item[0].value.replaceAll("-", " "),
-          item[10].value == null ? "NULL" : item[0].value,
-          item[11].value == null ? "NULL" : item[0].value,
-          item[12].value == null ? "NULL" : item[0].value,
-          item[13].value == null ? "NULL" : item[0].value,
-          item[14].value == null ? "NULL" : item[0].value,
-        ],
-        function (error, results, fields) {
+        "INSERT INTO ficha_cliente SET ?",
+        row,
+        (error, results, fields) => {
           if (error) throw error;
-          //console.log("sql query result: ", results[0]);
         }
       );
     } catch (error) {
-      console.log(`mysql error: ${error}`);
+      console.log(error);
     }
   });
 

@@ -47,6 +47,8 @@ app.get("/token", async (req, res) => {
   const items = await axiosAuth.get(
     "https://api.podio.com/item/app/25736871?limit=500"
   );
+
+  const tableNames = ["fecha_de _cierre_de_la_propuesta", "cerro"];
   const headers = ["Fecha de cierre de la propuesta", "Cerró"];
 
   const fichacliente = [];
@@ -108,8 +110,26 @@ app.get("/token", async (req, res) => {
       } */
     });
 
-    console.table(newItem);
+    //console.table(newItem);
     fichacliente.push([...newItem]);
+  });
+
+  fichacliente.forEach((item) => {
+    const row = {};
+    item.forEach((field, index) => {
+      row[tableNames[index]] = field.value;
+    });
+    try {
+      pool.query(
+        "INSERT INTO cierre_ecosistema SET ?",
+        row,
+        (error, results, fields) => {
+          if (error) throw error;
+        }
+      );
+    } catch (error) {
+      console.log(error);
+    }
   });
 
   res.send("completed");

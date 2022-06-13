@@ -36,14 +36,17 @@ app.get("/token", async (req, res) => {
   const items = await axiosAuth.get(
     "https://api.podio.com/item/app/25858633?limit=500"
   );
-  const headers = ["Fecha R1", "Se tuvo la  R1 ?", "Categoria"];
+  const headers = ["Fecha de contacto"];
 
   const fichacliente = [];
 
   items.data.items.forEach((item, index) => {
     const { fields } = item;
     let currentItem = [];
-
+    currentItem.push({
+      title: "Creado el",
+      value: item.created_on,
+    });
     Object.values(fields).forEach((field) => {
       if (headers.includes(field.label.trim())) {
         if (field.values[0].value?.text) {

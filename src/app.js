@@ -36,6 +36,39 @@ app.get("/token", async (req, res) => {
   const items = await axiosAuth.get(
     "https://api.podio.com/item/app/26520248?limit=500"
   );
+
+  const tableNames = [
+    `cliente`,
+    `n_reuniones_o_demos_realizados`,
+    `n_propuestas_realizadas`,
+    `semana_start`,
+    `semana_end`,
+    `reuniones_generadas_por_outbound`,
+    `reuniones_en_argentina`,
+    `cierres_en_argentina`,
+    `reuniones_generadas_por_prospectin`,
+    `reuniones_en_chile`,
+    `cierres_en_chile`,
+    `reuniones_generadas_por_redes`,
+    `reuniones_en_colombia`,
+    `cierres_en_colombia`,
+    `reuniones_generadas_por_google_ads`,
+    `reuniones_en_espana`,
+    `cierres_en_espana`,
+    `reuniones_generadas_por_organico`,
+    `reuniones_en_mexico`,
+    `cierres_en_mexico`,
+    `reuniones_generadas_por_webinar_charla_similar`,
+    `reuniones_en_peru`,
+    `cierres_en_peru`,
+    `reuniones_generadas_por_partners`,
+    `reuniones_en_usa`,
+    `cierres_en_usa`,
+    `reuniones_generadas_por_referidos_o_contactos`,
+    `reuniones_en_otros_mercados`,
+    `cierres_en_otros_mercados`,
+    `n_de_cierres_realizados`,
+  ];
   const headers = [
     "cliente",
     "Nº reuniones o demos realizados",
@@ -83,11 +116,11 @@ app.get("/token", async (req, res) => {
       if (headers[3].trim() === field.label) {
         currentItem.push({
           title: headers[4],
-          value: field.values[0].value.start_date_utc,
+          value: field.values[0].start_date_utc,
         });
         currentItem.push({
-          title: field.label.trim(),
-          value: field.values[0].value.text,
+          title: headers[5],
+          value: field.values[0].end_date,
         });
       } else if (headers.includes(field.label.trim())) {
         if (field.values[0].value?.text) {
@@ -106,34 +139,103 @@ app.get("/token", async (req, res) => {
 
             value: field.values[0].start_date_utc,
           });
-        } else if (field.values[0].value) {
+        } else if (field.values[0].value?.title) {
           currentItem.push({
             title: field.label.trim(),
-            value: field.values[0].value,
+            value: field.values[0].value.title,
           });
+        } else if (field.values[0].value) {
+          //console.log(`title ${field.label} value ${field.values[0].value}`);
+          if (field.type === "number") {
+            if (field.values[0].value === "0.0000") {
+              currentItem.push({
+                title: field.label.trim(),
+                value: 0,
+              });
+            } else {
+              currentItem.push({
+                title: field.label.trim(),
+                value: Number(Number(field.values[0].value).toFixed(0)),
+              });
+            }
+          } else {
+            currentItem.push({
+              title: field.label.trim(),
+              value: field.values[0].value,
+            });
+          }
         }
       }
     });
 
     let newItem = [];
+    const newHeaders = [
+      "cliente",
+      "Nº reuniones o demos realizados",
+      "Nº propuestas realizadas",
+      "Semana - start",
+      "Semana - end",
+      "Reuniones generadas por: Outbound",
+      "Reuniones en Argentina",
+      "Cierres en Argentina",
+      "Reuniones generadas por: Prospectin",
+      "Reuniones en Chile",
+      "Cierres en Chile",
+      "Reuniones generadas por: Redes",
+      "Reuniones en Colombia",
+      "Cierres en Colombia",
+      "Reuniones generadas por: Google Ads",
+      "Reuniones en España",
+      "Cierres en España",
+      "Reuniones generadas por: Orgánico",
+      "Reuniones en México",
+      "Cierres en México",
+      "Reuniones generadas por: Webinar /charla /similar",
+      "Reuniones en Perú",
+      "Cierres en Perú",
+      "Reuniones generadas por: partners",
+      "Reuniones en  USA",
+      "Cierres en USA",
+      "Reuniones generadas por: Referidos o contactos",
+      "Reuniones en otros mercados",
+      "Cierres en otros mercados",
+      "Nº de cierres realizados",
+    ];
 
-    headers.forEach((header, index) => {
+    newHeaders.forEach((header, index) => {
       let currentField = null;
+
       Object.values(currentItem).forEach((item) => {
         if (item.title === header) {
           currentField = item.value;
         }
       });
-
-      if (!currentField) {
+      if (!currentField && currentField !== 0) {
         newItem.push({ title: header, value: null });
       } else {
         newItem.push({ title: header, value: currentField });
       }
     });
-
-    console.table(newItem);
+    console.log(newItem);
     fichacliente.push([...newItem]);
+  });
+
+  fichacliente.forEach((item) => {
+    const row = {};
+    item.forEach((field, index) => {
+      row[tableNames[index]] = field.value;
+    });
+    try {
+      pool.query(
+        "INSERT INTO tablero_con_clientes SET ?",
+        row,
+        (error, results, fields) => {
+          if (error) throw error;
+        }
+      );
+    } catch (error) {
+      console.log(error);
+    }
   });
 
   res.send("completed");

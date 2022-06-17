@@ -34,26 +34,40 @@ app.get("/token", async (req, res) => {
   });
 
   const items = await axiosAuth.get(
-    "https://api.podio.com/item/app/25736765?limit=500"
+    "https://api.podio.com/item/app/25366617?limit=500"
   );
 
-  const tableNames = [`fecha_r1`, `se tuvo_la_ r1`, `categoria`];
-  const headers = ["Fecha R1", "Se tuvo la  R1 ?", "Categoria"];
+  const tableNames = [
+    `creado_el`,
+    `empresa`,
+    `coordinador_a_cargo`,
+    `status`,
+    `momento`,
+    `Problema`,
+  ];
+  const headers = [
+    "Creado el",
+    "Empresa",
+    "Coordinador a Cargo",
+    "Status",
+    "Momento",
+    "Problema",
+  ];
 
   const fichacliente = [];
 
   items.data.items.forEach((item, index) => {
     const { fields } = item;
     let currentItem = [];
-
+    currentItem.push({ title: "Creado el", value: item.created_on });
     Object.values(fields).forEach((field) => {
       if (headers.includes(field.label.trim())) {
-        if (field.values[0].value?.text) {
+        if (field.values[0].value.text) {
           currentItem.push({
             title: field.label.trim(),
             value: field.values[0].value.text,
           });
-        } else if (field.values[0].value?.start_date_utc) {
+        } else if (field.values[0].value.start_date_utc) {
           currentItem.push({
             title: field.label.trim(),
             value: field.values[0].value.start_date_utc,
@@ -62,6 +76,11 @@ app.get("/token", async (req, res) => {
           currentItem.push({
             title: field.label.trim(),
             value: field.values[0].start_date_utc,
+          });
+        } else if (field.values[0].value.name) {
+          currentItem.push({
+            title: field.label.trim(),
+            value: field.values[0].value.name,
           });
         } else if (field.values[0].value) {
           currentItem.push({
@@ -99,9 +118,13 @@ app.get("/token", async (req, res) => {
       row[tableNames[index]] = field.value;
     });
     try {
-      pool.query("INSERT INTO r1 SET ?", row, (error, results, fields) => {
-        if (error) throw error;
-      });
+      pool.query(
+        "INSERT INTO troubleshooting SET ?",
+        row,
+        (error, results, fields) => {
+          if (error) throw error;
+        }
+      );
     } catch (error) {
       console.log(error);
     }

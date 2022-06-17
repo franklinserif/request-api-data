@@ -55,6 +55,7 @@ app.get("/token", async (req, res) => {
     "tipo_de_empresa",
     "pais",
     "expectativas_y_objectivos_del_proyecto",
+    "testimonio_grabado",
   ];
 
   const headers = [
@@ -73,6 +74,7 @@ app.get("/token", async (req, res) => {
     "Tipo de empresa",
     "País",
     "Expectativas y objetivo del proyecto",
+    "Testimonio Grabado",
   ];
 
   const fichacliente = [];
@@ -93,7 +95,8 @@ app.get("/token", async (req, res) => {
         field.label === headers[10] ||
         field.label === headers[11] ||
         field.label === headers[12] ||
-        field.label === headers[13]
+        field.label === headers[13] ||
+        field.label === headers[15]
       ) {
         //console.log(field.text);
         currentItem.push({
